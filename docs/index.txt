@@ -14,3 +14,4 @@ Contents:
 I'm alain_afpy on irc://irc.freenode.net/afpy
 
 
+.. image:: http://www.gawel.org/thumbs/large/alain_at_rennes.jpg
