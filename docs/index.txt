@@ -11,10 +11,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-Indices and tables
-==================
+I'm alain_afpy on irc://irc.freenode.net/afpy
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
