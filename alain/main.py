@@ -3,8 +3,10 @@ from irc import IRCBot, IRCConnection as BaseConn
 from ConfigObject import ConfigObject
 from irc import socket
 from functools import wraps
+import random
 import httplib
 import time
+import stat
 import sys
 import os
 
@@ -65,13 +67,14 @@ class IRCConnection(BaseConn):
         self.mon()
 
     def ghost(self):
-        nick = self.config.bot.nick
-        self.send('PRIVMSG nickserv :ghost %s %s ' % (nick, self.config.bot.password))
-        time.sleep(2)
-        self.nick = nick
-        self.send('NICK %s' % self.nick)
-        time.sleep(2)
-        self.send('PRIVMSG nickserv :identify %s' % self.config.bot.password)
+        if self.config.bot.password:
+            nick = self.config.bot.nick
+            self.send('PRIVMSG nickserv :ghost %s %s ' % (nick, self.config.bot.password))
+            time.sleep(2)
+            self.nick = nick
+            self.send('NICK %s' % self.nick)
+            time.sleep(2)
+            self.send('PRIVMSG nickserv :identify %s' % self.config.bot.password)
 
     def mon(self, verbose=False):
         for name, s in self.services:
@@ -115,6 +118,17 @@ class Alain(IRCBot):
         self.conn.mon(verbose=True)
         return 'Done.'
 
+    @sudoers_command
+    def clean(self, nick, message, channel):
+        """Supprime les doublons dans ce que je dis"""
+        messages = []
+        with open(self.config.bot.db) as fd:
+            messages = set([l for l in fd.readlines() if l.strip()])
+        with open(self.config.bot.db, 'w') as fd:
+            for message in messages:
+                fd.write(message)
+        return "Ca c'est fait"
+
     def matin(self, nick, message, channel):
         """Ping"""
         return '%s: matin' % nick
@@ -139,17 +153,39 @@ class Alain(IRCBot):
         """Liste des gens sudoers sur py.afpy.org"""
         return ', '.join(self.sudoers)
 
-    def log(self, *args, **kwargs):
-        print args, kwargs
+
+    def add_message(self, message):
+        with open(self.config.bot.db, 'a+') as fd:
+            fd.write(message+'\n')
+
+    def get_message(self):
+        pos = random.randint(0, os.stat('var/messages.txt')[stat.ST_SIZE])
+        with open(self.config.bot.db) as fd:
+            fd.seek(pos)
+            fd.readline()
+            try:
+                return fd.readline()
+            except:
+                return 'matin'
+
+    def ia(self, nick, message, channel):
+        print nick, message, channel
+        if not channel:
+            return ''
+        for k in self.__class__.__dict__:
+            if message.startswith(k):
+                return ''
+        self.add_message(message)
+        return '%s: %s' % (nick, self.get_message())
 
     def command_patterns(self):
         commands = []
         for k, v in self.__class__.__dict__.items():
             if not k.startswith('_') and getattr(v, '__doc__', None):
-                commands.append(self.ping('^%s' % k, getattr(self, k)))
+                commands.append(self.ping('^%s$' % k, getattr(self, k)))
         return commands + [
             ('(.*\soffre.*emploi.*)', self.offre_emploi),
-            ('(.*)', self.log),
+            self.ping('(.*)', self.ia),
         ]
 
 
@@ -163,7 +199,7 @@ sudoers = (
   )
 services = (
         ('www', HTTPPing('www.afpy.org', 80, '/')),
-        ('squid', HTTPPing('www.afpy.org', 8000, '/')),
+        ('varnish', HTTPPing('www.afpy.org', 8000, '/')),
         ('membres', HTTPPing('www.afpy.org', 80, '/membres/login')),
         ('hg', HTTPPing('hg.afpy.org', 443, '/')),
         ('afpyro', HTTPPing('afpy.ro', 80, '/faq.html')),
@@ -176,7 +212,6 @@ services = (
 def main():
     config = ConfigObject(defaults=dict(here=os.getcwd()))
     config.read(os.path.expanduser('~/.alainrc'))
-    print config.bot
     conn = IRCConnection('irc.freenode.net', 6667, config.bot.nick+'_',
                          verbosity=config.bot.verbosity.as_int(),
                          logfile=config.bot.logfile or None)
@@ -190,6 +225,7 @@ def main():
     bot.config = config
     bot.channel = config.bot.channel
     bot.sudoers = sudoers
+    bot.messages = []
     conn.join(config.bot.channel)
     time.sleep(2)
     conn.respond('matin', config.bot.channel)
