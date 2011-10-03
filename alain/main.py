@@ -169,7 +169,6 @@ class Alain(IRCBot):
                 return 'matin'
 
     def ia(self, nick, message, channel):
-        print nick, message, channel
         if not channel:
             return ''
         for k in self.__class__.__dict__:
