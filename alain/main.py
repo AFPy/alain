@@ -3,8 +3,12 @@ from irc import IRCBot, IRCConnection as BaseConn
 from ConfigObject import ConfigObject
 from irc import socket
 from functools import wraps
+from alain.regexp import REGEXP
+from alain import crons
+import datetime
 import random
 import httplib
+import types
 import time
 import stat
 import sys
@@ -64,6 +68,7 @@ class IRCConnection(BaseConn):
         """
         self.logger.info('server ping: %s' % payload)
         self.send('PONG %s' % payload)
+        self.afpyro_cron()
         self.mon()
 
     def ghost(self):
@@ -94,12 +99,56 @@ class IRCConnection(BaseConn):
                 self.respond(message, self.channel)
             self.logger.info(message)
 
+    @crons.dayly(17, 42)
+    def afpyro_cron(self):
+        message = self.afpyro(force=True)
+        if message:
+            self.respond(message, self.channel)
+
+    def afpyro(self, force=False):
+        try:
+            conn = httplib.HTTPConnection('afpy.ro', 80)
+            conn.request('GET', '/')
+            resp = conn.getresponse()
+        except:
+            return ''
+        location = resp.getheader('location')
+        date = location.split('/')[-1].split('.')[0].split('_')
+        date = datetime.datetime(*[int(i) for i in date])
+        now = datetime.datetime.now()
+        delta = date - now
+        message = ''
+        if delta.days == 0:
+            message = 'Ca va commencer!!! %s' % location
+        elif delta.days == 1:
+            message = 'C\'est demain!!! %s' % location
+        elif delta.days > 10 and (delta.days % 5 == 0 or force):
+            message = 'Prochain afpyro dans %s jours...... *loin* %s' % (delta.days, location)
+        elif delta.days > 5 and (delta.days % 3 == 0 or force):
+            message = 'Prochain afpyro dans %s jours... %s' % (delta.days, location)
+        elif delta.days > 0 and delta.days < 5:
+            message = 'Prochain afpyro dans %s jours! %s' % (delta.days, location)
+        return message
+
+
 def sudoers_command(func):
     @wraps(func)
     def wrapper(self, nick, message, channel):
         if nick not in sudoers or not channel:
             return 'matin %s' % nick
         return func(self, nick, message, channel)
+    return wrapper
+
+
+def reponse(values):
+    def wrapper(self, nick, message, channel):
+        if not channel:
+            return ''
+        if isinstance(values, (list, tuple)):
+            message = random.choice(values)
+        else:
+            message = values
+        return message % dict(nick=nick, channel=channel)
     return wrapper
 
 
@@ -121,10 +170,11 @@ class Alain(IRCBot):
     @sudoers_command
     def clean(self, nick, message, channel):
         """Supprime les doublons dans ce que je dis"""
+        filename = os.path.join(self.config.bot.var, 'messages.txt')
         messages = []
-        with open(self.config.bot.db) as fd:
+        with open(filename) as fd:
             messages = set([l for l in fd.readlines() if l.strip()])
-        with open(self.config.bot.db, 'w') as fd:
+        with open(filename, 'w') as fd:
             for message in messages:
                 fd.write(message)
         return "Ca c'est fait"
@@ -141,10 +191,6 @@ class Alain(IRCBot):
                 self.respond('- %s: %s' % (k, v.__doc__.strip()), channel)
         return ''
 
-    def offre_emploi(self, *args, **kwargs):
-        return ('''Pour poster une offre d'emploi veuillez consulter:'''
-                ' http://www.afpy.org/docs/faq.html#comment-puis-je-poster-une-offre-d-emloi')
-
     def faq(self, *args, **kwargs):
         """URL de la FAQ"""
         return 'http://www.afpy.org/docs/faq.html'
@@ -153,14 +199,23 @@ class Alain(IRCBot):
         """Liste des gens sudoers sur py.afpy.org"""
         return ', '.join(self.sudoers)
 
+    def afpyro(self, *args, **kwargs):
+        """Date/URL du prochain afpyro"""
+        message = self.conn.afpyro(force=True)
+        if message:
+            return message
+        else:
+            return 'Rien à boire...'
 
     def add_message(self, message):
-        with open(self.config.bot.db, 'a+') as fd:
+        filename = os.path.join(self.config.bot.var, 'messages.txt')
+        with open(filename, 'a+') as fd:
             fd.write(message+'\n')
 
     def get_message(self):
-        pos = random.randint(0, os.stat('var/messages.txt')[stat.ST_SIZE])
-        with open(self.config.bot.db) as fd:
+        filename = os.path.join(self.config.bot.var, 'messages.txt')
+        pos = random.randint(0, os.stat(filename)[stat.ST_SIZE])
+        with open(filename) as fd:
             fd.seek(pos)
             fd.readline()
             try:
@@ -182,8 +237,12 @@ class Alain(IRCBot):
         for k, v in self.__class__.__dict__.items():
             if not k.startswith('_') and getattr(v, '__doc__', None):
                 commands.append(self.ping('^%s$' % k, getattr(self, k)))
+        for i, (regexp, values) in enumerate(REGEXP):
+            meth = reponse(values)
+            meth.__name__ = 'rep_%s' % i
+            meth = types.MethodType(meth, self)
+            commands.append((regexp, meth))
         return commands + [
-            ('(.*\soffre.*emploi.*)', self.offre_emploi),
             self.ping('(.*)', self.ia),
         ]
 
@@ -228,7 +287,6 @@ def main():
     conn.join(config.bot.channel)
     time.sleep(2)
     conn.respond('matin', config.bot.channel)
-    conn.mon()
     conn.enter_event_loop()
 
 
