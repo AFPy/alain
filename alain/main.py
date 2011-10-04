@@ -114,7 +114,9 @@ class IRCConnection(BaseConn):
             return ''
         location = resp.getheader('location')
         date = location.split('/')[-1].split('.')[0].split('_')
-        date = datetime.datetime(*[int(i) for i in date])
+        date = [int(i) for i in date]
+        date.extend([23, 0])
+        date = datetime.datetime(*date)
         now = datetime.datetime.now()
         delta = date - now
         message = ''
