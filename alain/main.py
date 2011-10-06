@@ -5,6 +5,8 @@ from irc import socket
 from functools import wraps
 from alain.regexp import REGEXP
 from alain import crons
+from alain import rss
+import threading
 import datetime
 import random
 import httplib
@@ -66,10 +68,15 @@ class IRCConnection(BaseConn):
         """\
         Respond to periodic PING messages from server
         """
-        self.logger.info('server ping: %s' % payload)
         self.send('PONG %s' % payload)
-        self.afpyro_cron()
-        self.mon()
+        def async(self):
+            self.mon()
+            for k in [name for name in dir(self) if name.endswith('_cron')]:
+                v = getattr(self, k)
+                if getattr(v, 'is_cron', False) is True:
+                    v()
+        t = threading.Thread(target=async, args=(self,))
+        t.start()
 
     def ghost(self):
         if self.config.bot.password:
@@ -97,11 +104,22 @@ class IRCConnection(BaseConn):
                 self.respond(message, self.channel)
             elif not status or not s.status:
                 self.respond(message, self.channel)
-            self.logger.info(message)
+
+    @crons.hourly(4, 20)
+    def awaiting_cron(self):
+        try:
+            message = rss.awaiting()
+        except:
+            pass
+        else:
+            if message:
+                self.respond(message, self.channel)
+                return message
+        return ''
 
     @crons.dayly(17, 42)
     def afpyro_cron(self):
-        message = self.afpyro(force=True)
+        message = self.afpyro()
         if message:
             self.respond(message, self.channel)
 
@@ -150,6 +168,8 @@ def reponse(values):
             message = random.choice(values)
         else:
             message = values
+        s = random.choice([float(x)/10 for x in range(5, 15, 1)])
+        time.sleep(s)
         return message % dict(nick=nick, channel=channel)
     return wrapper
 

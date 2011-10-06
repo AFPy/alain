@@ -3,7 +3,7 @@ REGEXP = (
 # syntaxe: (regexp, messages)
 # messages peut-etre une liste, un tuple, ou une chaine
 
-(r'((^|.*\s)(faudrai.|faut)\s+qu.*)', 'WARNING !!! YAKAFOKON DETECTED !!!!'),
+(r'((^|.*\s)(faudrai.|faut)\s+qu.on.*)', 'WARNING !!! YAKAFOKON DETECTED !!!!'),
 
 (r'(.*\soffre.*emploi.*)',
     ('''Pour poster une offre d'emploi veuillez consulter:'''
