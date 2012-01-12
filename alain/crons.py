@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
-import httplib
 import functools
 import os
+
 
 def hourly(h, m):
     def wrapper(func):
@@ -15,7 +15,7 @@ def hourly(h, m):
             if now.hour < 9 or now.hour > 20:
                 return ''
             cron = os.path.join(self.config.bot.var,
-                                func.__name__+'.cron')
+                                func.__name__ + '.cron')
             current = now.strftime('%H')
             latest = None
             if os.path.isfile(cron):
@@ -33,6 +33,7 @@ def hourly(h, m):
         return wrapped
     return wrapper
 
+
 def dayly(h, m):
     def wrapper(func):
         @functools.wraps(func)
@@ -40,7 +41,7 @@ def dayly(h, m):
             self.logger.info('Entering cron %s', func.__name__)
             now = datetime.datetime.now()
             cron = os.path.join(self.config.bot.var,
-                                func.__name__+'.cron')
+                                func.__name__ + '.cron')
             current = now.strftime('%d-%m-%Y')
             latest = None
             if os.path.isfile(cron):
@@ -57,6 +58,3 @@ def dayly(h, m):
         wrapped.is_cron = True
         return wrapped
     return wrapper
-
-
-

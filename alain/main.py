@@ -20,7 +20,8 @@ import os
 class HTTPPing(object):
 
     def __init__(self, host, port, path, timeout=30):
-        self.host, self.port, self.path, self.timeout = host, port, path, timeout
+        self.host, self.port, self.path = host, port, path
+        self.timeout = timeout
         self.status = True
         self.reason = ''
 
@@ -43,6 +44,7 @@ class HTTPPing(object):
                 self.status = False
                 self.reason = '%s %s' % (resp.status, resp.reason)
 
+
 class IRCConnection(BaseConn):
 
     def connect(self):
@@ -53,12 +55,14 @@ class IRCConnection(BaseConn):
         try:
             self._sock.connect((self.server, self.port))
         except socket.error:
-            self.logger.error('Unable to connect to %s on port %d' % (self.server, self.port), exc_info=1)
+            self.logger.error('Unable to connect to %s on port %d' % (
+                                           self.server, self.port), exc_info=1)
             sys.exit(1)
 
         self._sock_file = self._sock.makefile()
 
-        self.send("USER alain %s bla :I'm Alain. The AFPy mascot" % (self.server,))
+        self.send("USER alain %s bla :I'm Alain. The AFPy mascot" % (
+                                                                self.server,))
         self.logger.info('Authing as %s' % self.nick)
 
         # send NICK command as soon as authing
@@ -69,30 +73,35 @@ class IRCConnection(BaseConn):
         Respond to periodic PING messages from server
         """
         self.send('PONG %s' % payload)
+
         def async(self):
             self.mon()
             for k in [name for name in dir(self) if name.endswith('_cron')]:
                 v = getattr(self, k)
                 if getattr(v, 'is_cron', False) is True:
                     v()
+
         t = threading.Thread(target=async, args=(self,))
         t.start()
 
     def ghost(self):
         if self.config.bot.password:
             nick = self.config.bot.nick
-            self.send('PRIVMSG nickserv :ghost %s %s ' % (nick, self.config.bot.password))
+            self.send('PRIVMSG nickserv :ghost %s %s ' % (
+                                               nick, self.config.bot.password))
             time.sleep(2)
             self.nick = nick
             self.send('NICK %s' % self.nick)
             time.sleep(2)
-            self.send('PRIVMSG nickserv :identify %s' % self.config.bot.password)
+            self.send(
+                    'PRIVMSG nickserv :identify %s' % self.config.bot.password)
 
     def mon(self, verbose=False):
         for name, s in self.services:
             status = s.status
             s.ping()
 
+            message = ''
             if status and s.status:
                 message = '- %s: UP' % name
             elif status and not s.status:
@@ -143,11 +152,14 @@ class IRCConnection(BaseConn):
         elif delta.days == 1:
             message = 'C\'est demain!!! %s' % location
         elif delta.days > 10 and (delta.days % 5 == 0 or force):
-            message = 'Prochain afpyro dans %s jours...... *loin* %s' % (delta.days, location)
+            message = 'Prochain afpyro dans %s jours...... *loin* %s' % (
+                                                         delta.days, location)
         elif delta.days > 5 and (delta.days % 3 == 0 or force):
-            message = 'Prochain afpyro dans %s jours... %s' % (delta.days, location)
+            message = 'Prochain afpyro dans %s jours... %s' % (
+                                                         delta.days, location)
         elif delta.days > 0 and delta.days < 5:
-            message = 'Prochain afpyro dans %s jours! %s' % (delta.days, location)
+            message = 'Prochain afpyro dans %s jours! %s' % (
+                                                         delta.days, location)
         return message
 
 
@@ -168,7 +180,7 @@ def reponse(values):
             message = random.choice(values)
         else:
             message = values
-        s = random.choice([float(x)/10 for x in range(5, 15, 1)])
+        s = random.choice([float(x) / 10 for x in range(5, 15, 1)])
         time.sleep(s)
         return message % dict(nick=nick, channel=channel)
     return wrapper
@@ -188,6 +200,13 @@ class Alain(IRCBot):
         self.conn.respond('Checking services...', channel)
         self.conn.mon(verbose=True)
         return 'Done.'
+
+    @sudoers_command
+    def die(self, nick, message, channel):
+        """Die"""
+        self.conn.respond('+', channel)
+        self.conn.send('QUIT')
+        raise OSError()
 
     @sudoers_command
     def clean(self, nick, message, channel):
@@ -232,7 +251,7 @@ class Alain(IRCBot):
     def add_message(self, message):
         filename = os.path.join(self.config.bot.var, 'messages.txt')
         with open(filename, 'a+') as fd:
-            fd.write(message+'\n')
+            fd.write(message + '\n')
 
     def get_message(self):
         filename = os.path.join(self.config.bot.var, 'messages.txt')
@@ -292,7 +311,7 @@ services = (
 def main():
     config = ConfigObject(defaults=dict(here=os.getcwd()))
     config.read(os.path.expanduser('~/.alainrc'))
-    conn = IRCConnection('irc.freenode.net', 6667, config.bot.nick+'_',
+    conn = IRCConnection('irc.freenode.net', 6667, config.bot.nick + '_',
                          verbosity=config.bot.verbosity.as_int(),
                          logfile=config.bot.logfile or None)
     conn.config = config
@@ -309,6 +328,7 @@ def main():
     conn.join(config.bot.channel)
     time.sleep(2)
     conn.respond('matin', config.bot.channel)
-    conn.enter_event_loop()
-
-
+    try:
+        conn.enter_event_loop()
+    except Exception:
+        pass
