@@ -135,8 +135,9 @@ class IRCConnection(BaseConn):
 
     def afpyro(self, force=False):
         messages = []
+        now = datetime.datetime.now()
+        now = datetime.datetime(now.year, now.month, now.day)
         for date, link in incoming_afpyros():
-            now = datetime.datetime.now()
             delta = date - now
             message = ''
             if delta.days == 0:
