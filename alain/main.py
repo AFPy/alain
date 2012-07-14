@@ -3,6 +3,7 @@ from irc import IRCBot, IRCConnection as BaseConn
 from ConfigObject import ConfigObject
 from irc import socket
 from functools import wraps
+from alain.afpyro import incoming_afpyros
 from alain.regexp import REGEXP
 from alain import crons
 from alain import rss
@@ -128,39 +129,32 @@ class IRCConnection(BaseConn):
 
     @crons.dayly(17, 42)
     def afpyro_cron(self):
-        message = self.afpyro()
-        if message:
+        messages = self.afpyro()
+        for message in messages:
             self.respond(message, self.channel)
 
     def afpyro(self, force=False):
-        try:
-            conn = httplib.HTTPConnection('afpy.ro', 80)
-            conn.request('GET', '/')
-            resp = conn.getresponse()
-        except:
-            return ''
-        location = resp.getheader('location')
-        date = location.split('/')[-1].split('.')[0].split('_')
-        date = [int(i) for i in date]
-        date.extend([23, 0])
-        date = datetime.datetime(*date)
-        now = datetime.datetime.now()
-        delta = date - now
-        message = ''
-        if delta.days == 0:
-            message = 'Ca va commencer!!! %s' % location
-        elif delta.days == 1:
-            message = 'C\'est demain!!! %s' % location
-        elif delta.days > 10 and (delta.days % 5 == 0 or force):
-            message = 'Prochain afpyro dans %s jours...... *loin* %s' % (
-                                                         delta.days, location)
-        elif delta.days > 5 and (delta.days % 3 == 0 or force):
-            message = 'Prochain afpyro dans %s jours... %s' % (
-                                                         delta.days, location)
-        elif delta.days > 0 and delta.days < 5:
-            message = 'Prochain afpyro dans %s jours! %s' % (
-                                                         delta.days, location)
-        return message
+        messages = []
+        for date, link in incoming_afpyros():
+            now = datetime.datetime.now()
+            delta = date - now
+            message = ''
+            if delta.days == 0:
+                message = 'Ca va commencer!!! %s' % link
+            elif delta.days == 1:
+                message = 'C\'est demain!!! %s' % link
+            elif delta.days > 10 and (delta.days % 5 == 0 or force):
+                message = 'Prochain afpyro dans %s jours...... *loin* %s' % (
+                                                             delta.days, link)
+            elif delta.days > 5 and (delta.days % 3 == 0 or force):
+                message = 'Prochain afpyro dans %s jours... %s' % (
+                                                             delta.days, link)
+            elif delta.days > 0 and delta.days < 5:
+                message = 'Prochain afpyro dans %s jours! %s' % (
+                                                             delta.days, link)
+            if message:
+                messages.append(message)
+        return messages
 
 
 def sudoers_command(func):
@@ -242,9 +236,11 @@ class Alain(IRCBot):
 
     def afpyro(self, *args, **kwargs):
         """Date/URL du prochain afpyro"""
-        message = self.conn.afpyro(force=True)
-        if message:
-            return message
+        messages = self.conn.afpyro(force=True)
+        if messages:
+            for message in messages:
+                self.respond(message, self.config.bot.channel)
+            return ''
         else:
             return 'Rien à boire...'
 
