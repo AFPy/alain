@@ -4,7 +4,7 @@ REGEXP = (
 # messages peut-etre une liste, un tuple, ou une chaine
 
 (r'^(lol|mdr)$',
-     ('MDR', 'hihihi', 'HAHAHA', "mdr t'es con"),
+     ('MDR', 'hihihi', 'HAHAHA', "mdr t'es con")),
 
 (r'((^|.*\s)(faudrai.|faut|ca serait bien que)\s+qu.*)',
      'WARNING !!! YAKAFOKON DETECTED !!!!'),
