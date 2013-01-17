@@ -3,6 +3,7 @@ from irc import IRCBot, IRCConnection as BaseConn
 from ConfigObject import ConfigObject
 from irc import socket
 from functools import wraps
+from alain.cantine import check_events
 from alain.afpyro import incoming_afpyros
 from alain.regexp import REGEXP
 from alain import crons
@@ -62,8 +63,8 @@ class IRCConnection(BaseConn):
 
         self._sock_file = self._sock.makefile()
 
-        self.send("USER alain %s bla :I'm Alain. The AFPy mascot" % (
-                                                                self.server,))
+        self.send("USER alain %s blah :I'm Alain. The AFPy mascot" % (
+                                                     self.server,), True)
         self.logger.info('Authing as %s' % self.nick)
 
         # send NICK command as soon as authing
@@ -96,6 +97,8 @@ class IRCConnection(BaseConn):
             time.sleep(2)
             self.send(
                     'PRIVMSG nickserv :identify %s' % self.config.bot.password)
+        else:
+            self.logger.info('No password set')
 
     def mon(self, verbose=False):
         for name, s in self.services:
@@ -125,6 +128,26 @@ class IRCConnection(BaseConn):
             if message:
                 self.respond(message, self.channel)
                 return message
+        return ''
+
+    @crons.hourly(4, 40)
+    def matte_cron(self):
+        return self.matte()
+
+    def matte(self, force=False):
+        filename = os.path.join(self.config.bot.var, 'cantine.txt')
+        try:
+            results = check_events(filename)
+        except:
+            raise
+        else:
+            if results:
+                for amount, url in results:
+                    if force or amount > 10:
+                        line = 'Il y a %s inscrits pour %s' % (amount, url)
+                        self.respond(line, self.channel)
+            elif force:
+                self.respond("J'ai rien", self.channel)
         return ''
 
     @crons.dayly(17, 42)
@@ -158,13 +181,21 @@ class IRCConnection(BaseConn):
         return messages
 
 
-def sudoers_command(func):
-    @wraps(func)
-    def wrapper(self, nick, message, channel):
-        if nick not in sudoers or not channel:
-            return 'matin %s' % nick
-        return func(self, nick, message, channel)
-    return wrapper
+def sudoers_command(arg):
+    def wrapper(func, regexp):
+        @wraps(func)
+        def cmd(self, nick, message, channel, *args, **kwargs):
+            if nick not in sudoers or not channel:
+                return 'matin %s' % nick
+            return func(self, nick, message, channel)
+        cmd.regexp = regexp
+        return cmd
+    if isinstance(arg, basestring):
+        def wait_for_func(func):
+            return wrapper(func, arg)
+        return wait_for_func
+    else:
+        return wrapper(arg, '^%s$')
 
 
 def reponse(values):
@@ -204,6 +235,12 @@ class Alain(IRCBot):
         raise OSError()
 
     @sudoers_command
+    def pyping(self, nick, message, channel):
+        """ping"""
+        self.conn.handle_ping(':' + nick)
+        return ''
+
+    @sudoers_command
     def clean(self, nick, message, channel):
         """Supprime les doublons dans ce que je dis"""
         filename = os.path.join(self.config.bot.var, 'messages.txt')
@@ -215,6 +252,26 @@ class Alain(IRCBot):
                 fd.write(message)
         return "Ca c'est fait"
 
+    @sudoers_command('^%s .*')
+    def matte(self, nick, message, channel):
+        """Je matte le nombre d'inscrit à un event de la cantine
+        (url|liste|rien)"""
+        filename = os.path.join(self.config.bot.var, 'cantine.txt')
+        message = message.split(' ', 1)[1]
+        if message.startswith('http://lacantine.org/'):
+            with open(filename, 'a+') as fd:
+                fd.write(message.strip() + '\n')
+            return 'Je matterai %s' % message
+        elif message.startswith('rien'):
+            with open(filename, 'w') as fd:
+                fd.write('')
+            return 'Je matte plus rien'
+        elif message.startswith('list'):
+            return self.conn.matte(force=True)
+        else:
+            return 'Moi pas comprendre'
+        return ''
+
     def matin(self, nick, message, channel):
         """Ping"""
         return '%s: matin' % nick
@@ -224,7 +281,8 @@ class Alain(IRCBot):
         self.respond('Available commands are:', channel)
         for k, v in self.__class__.__dict__.items():
             if not k.startswith('_') and getattr(v, '__doc__', None):
-                self.respond('- %s: %s' % (k, v.__doc__.strip()), channel)
+                lines = [l.strip() for l in v.__doc__.split()]
+                self.respond('- %s: %s' % (k, ' '.join(lines)), channel)
         return ''
 
     def faq(self, *args, **kwargs):
@@ -274,7 +332,8 @@ class Alain(IRCBot):
         commands = []
         for k, v in self.__class__.__dict__.items():
             if not k.startswith('_') and getattr(v, '__doc__', None):
-                commands.append(self.ping('^%s$' % k, getattr(self, k)))
+                regexp = getattr(v, 'regexp', '^%s$') % k
+                commands.append(self.ping(regexp, getattr(self, k)))
         for i, (regexp, values) in enumerate(REGEXP):
             meth = reponse(values)
             meth.__name__ = 'rep_%s' % i
@@ -327,5 +386,5 @@ def main():
     conn.respond('matin', config.bot.channel)
     try:
         conn.enter_event_loop()
-    except Exception:
-        pass
+    except Exception, e:
+        conn.logger.exception(e)

@@ -25,6 +25,7 @@ def hourly(h, m):
                 return ''
             result = ''
             if now.minute >= m:
+                self.logger.info('Running cron %s', func.__name__)
                 result = func(self, *args, **kwargs)
                 with open(cron, 'w') as fd:
                     fd.write(now.strftime('%H'))
@@ -51,6 +52,7 @@ def dayly(h, m):
                 return ''
             result = ''
             if now.hour >= h and now.minute >= m:
+                self.logger.info('Running cron %s', func.__name__)
                 result = func(self, *args, **kwargs)
                 with open(cron, 'w') as fd:
                     fd.write(now.strftime('%d-%m-%Y'))
