@@ -16,7 +16,7 @@ def check_page(url):
         elif in_inscriptions:
             match = re.search('<li>(.*)</li>', line)
             registered.append(match.groups()[0])
-    return len(registered)
+    return len(set(registered))
 
 
 def check_events(filename):

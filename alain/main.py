@@ -139,7 +139,7 @@ class IRCConnection(BaseConn):
         try:
             results = check_events(filename)
         except:
-            raise
+            return ''
         else:
             if results:
                 for amount, url in results:
