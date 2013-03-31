@@ -39,7 +39,7 @@ class HTTPPing(object):
             self.status = False
             self.reason = str(e)
         else:
-            if resp.status == 200:
+            if resp.status in (200, 302):
                 self.status = True
                 self.reason = ''
             else:
@@ -58,13 +58,13 @@ class IRCConnection(BaseConn):
             self._sock.connect((self.server, self.port))
         except socket.error:
             self.logger.error('Unable to connect to %s on port %d' % (
-                                           self.server, self.port), exc_info=1)
+                              self.server, self.port), exc_info=1)
             sys.exit(1)
 
         self._sock_file = self._sock.makefile()
 
         self.send("USER alain %s blah :I'm Alain. The AFPy mascot" % (
-                                                     self.server,), True)
+                  self.server,), True)
         self.logger.info('Authing as %s' % self.nick)
 
         # send NICK command as soon as authing
@@ -90,13 +90,13 @@ class IRCConnection(BaseConn):
         if self.config.bot.password:
             nick = self.config.bot.nick
             self.send('PRIVMSG nickserv :ghost %s %s ' % (
-                                               nick, self.config.bot.password))
+                      nick, self.config.bot.password))
             time.sleep(2)
             self.nick = nick
             self.send('NICK %s' % self.nick)
             time.sleep(2)
             self.send(
-                    'PRIVMSG nickserv :identify %s' % self.config.bot.password)
+                'PRIVMSG nickserv :identify %s' % self.config.bot.password)
         else:
             self.logger.info('No password set')
 
@@ -169,13 +169,13 @@ class IRCConnection(BaseConn):
                 message = 'C\'est demain!!! %s' % link
             elif delta.days > 10 and (delta.days % 5 == 0 or force):
                 message = 'Prochain afpyro dans %s jours...... *loin* %s' % (
-                                                             delta.days, link)
+                    delta.days, link)
             elif delta.days > 5 and (delta.days % 3 == 0 or force):
                 message = 'Prochain afpyro dans %s jours... %s' % (
-                                                             delta.days, link)
+                    delta.days, link)
             elif delta.days > 0 and delta.days < 5:
                 message = 'Prochain afpyro dans %s jours! %s' % (
-                                                             delta.days, link)
+                    delta.days, link)
             if message:
                 messages.append(message)
         return messages
@@ -351,17 +351,17 @@ sudoers = (
     'jpcw',
     'tarek',
     'NelleV',
-  )
+)
+
 services = (
-        ('www', HTTPPing('www.afpy.org', 80, '/')),
-        ('varnish', HTTPPing('www.afpy.org', 8000, '/')),
-        ('membres', HTTPPing('www.afpy.org', 80, '/membres/login')),
-        ('hg', HTTPPing('hg.afpy.org', 443, '/')),
-        ('afpyro', HTTPPing('afpy.ro', 80, '/faq.html')),
-        ('pycon', HTTPPing('www.pycon.fr', 80, '/conference/edition2011')),
-        ('logs', HTTPPing('logs.afpy.org', 80, '/')),
-        ('fld', HTTPPing('front-de-liberation-des-developpeurs.org', 80, '/')),
-    )
+    ('www', HTTPPing('www.afpy.org', 80, '/')),
+    ('membres', HTTPPing('www.afpy.org', 80, '/membres/login')),
+    ('hg', HTTPPing('hg.afpy.org', 443, '/')),
+    ('afpyro', HTTPPing('afpy.ro', 80, '/faq.html')),
+    ('pycon', HTTPPing('www.pycon.fr', 80, '/conference/edition2011')),
+    ('logs', HTTPPing('logs.afpy.org', 80, '/')),
+    ('fld', HTTPPing('front-de-liberation-des-developpeurs.org', 80, '/')),
+)
 
 
 def main():
