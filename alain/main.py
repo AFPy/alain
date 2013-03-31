@@ -358,7 +358,7 @@ services = (
     ('membres', HTTPPing('www.afpy.org', 80, '/membres/login')),
     ('hg', HTTPPing('hg.afpy.org', 443, '/')),
     ('afpyro', HTTPPing('afpy.ro', 80, '/faq.html')),
-    ('pycon', HTTPPing('www.pycon.fr', 80, '/conference/edition2011')),
+    ('pycon', HTTPPing('www.pycon.fr', 80, '/2013/')),
     ('logs', HTTPPing('logs.afpy.org', 80, '/')),
     ('fld', HTTPPing('front-de-liberation-des-developpeurs.org', 80, '/')),
 )
