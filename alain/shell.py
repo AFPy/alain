@@ -11,12 +11,15 @@ def restart(name):
         elif name == 'docs':
             pwd = sh.pwd()
             sh.cd('/home/afpy/AfpySphinx/docs')
-            res = sh['make']('html').succeeded
-            sh.cd(pwd)
-            if res:
-                yield 'Docs build success'
+            if not sh['hg']('pull -u'):
+                yield 'Failed to update code'
             else:
-                yield 'Docs build failure'
+                res = sh['make']('html').succeeded
+                sh.cd(pwd)
+                if res:
+                    yield 'Docs build success'
+                else:
+                    yield 'Docs build failure'
         elif name == 'plone':
             plone = sh['/home/afpy/afpy2012/zinstance/bin/plonectl']
             for line in plone('restart', combine_stderr=True):
