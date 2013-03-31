@@ -11,7 +11,7 @@ REGEXP = (
 
 (r'(.*\soffre.*emploi.*)',
     ('''Pour poster une offre d'emploi veuillez consulter:'''
-     ' http://www.afpy.org/docs/faq.html'
-     '#comment-puis-je-poster-une-offre-d-emloi')),
+     ' http://www.afpy.org/doc/afpy/faq.html'
+     '#comment-puis-je-poster-une-offre-d-emploi')),
 
 )
