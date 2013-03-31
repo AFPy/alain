@@ -21,5 +21,7 @@ def restart(name):
             plone = sh['/home/afpy/afpy2012/zinstance/bin/plonectl']
             for line in plone('restart', combine_stderr=True):
                 yield line
+        else:
+            yield 'moi pas connaitre %s' % name
     except OSError, e:
         yield repr(e)

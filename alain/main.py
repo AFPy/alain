@@ -273,7 +273,7 @@ class Alain(IRCBot):
             return 'Moi pas comprendre'
         return ''
 
-    @sudoers_command('^%s (docs|plone|members|alain)')
+    @sudoers_command('^%s .*')
     def restart(self, nick, message, channel):
         """restart (docs|plone|members|alain)"""
         message = message.split(' ', 1)[1]
