@@ -13,7 +13,7 @@ def restart(name):
             sh.cd('/home/afpy/AfpySphinx/docs')
             res = sh['make']('html').succeeded
             sh.cd(pwd)
-            if res.success:
+            if res:
                 yield 'Docs build success'
             else:
                 yield 'Docs build failure'
