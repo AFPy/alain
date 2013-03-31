@@ -8,6 +8,7 @@ from alain.afpyro import incoming_afpyros
 from alain.regexp import REGEXP
 from alain import crons
 from alain import rss
+from alain import shell
 import threading
 import datetime
 import random
@@ -270,6 +271,14 @@ class Alain(IRCBot):
             return self.conn.matte(force=True)
         else:
             return 'Moi pas comprendre'
+        return ''
+
+    @sudoers_command('^%s restart (docs|plone|members|alain)')
+    def restart(self, nick, message, channel):
+        """restart (docs|plone|members|alain)"""
+        message = message.split(' ', 1)[1]
+        for line in shell.restart(message):
+            self.respond(line, channel)
         return ''
 
     def matin(self, nick, message, channel):
