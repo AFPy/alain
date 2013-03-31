@@ -11,7 +11,7 @@ def restart(name):
         elif name == 'docs':
             pwd = sh.pwd()
             sh.cd('/home/afpy/AfpySphinx/docs')
-            res = str(sh['make']('html'))
+            res = sh['make']('html').success
             sh.cd(pwd)
             if res.success:
                 yield 'Docs build success'
