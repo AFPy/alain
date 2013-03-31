@@ -21,7 +21,7 @@ def restart(name):
                 else:
                     yield 'Docs build failure'
         elif name == 'plone':
-            plone = sh['/home/afpy/afpy2012/zinstance/bin/plonectl']
+            plone = sh['/home/afpy/afpy2012/plone/zinstance/bin/plonectl']
             for line in plone('restart', combine_stderr=True):
                 yield line
         else:
