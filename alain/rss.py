@@ -9,7 +9,6 @@ cred = config.plone.user
 
 
 def awaiting():
-    print(cred)
     feed = feedparser.parse(
         'http://%s@www.afpy.org/search_rss?review_state=pending' % cred)
     entries = [str(e.id) for e in feed.entries]
