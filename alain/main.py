@@ -360,6 +360,9 @@ sudoers = (
     'jpcw',
     'tarek',
     'NelleV',
+    'arthru',
+    'feth',
+    'bmispelon',
 )
 
 services = (
