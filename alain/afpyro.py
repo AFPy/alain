@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 import feedparser
-import time
 
 
 def incoming_afpyros():
     feed = feedparser.parse(
-      'http://afpy.ro/afpyro.rss')
+        'http://afpyro.afpy.org/afpyro.rss')
     now = datetime.now()
     now = datetime(now.year, now.month, now.day)
     incomings = []

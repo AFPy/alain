@@ -369,7 +369,7 @@ services = (
     ('www', HTTPPing('www.afpy.org', 80, '/')),
     ('membres', HTTPPing('www.afpy.org', 80, '/membres/login')),
     ('hg', HTTPPing('hg.afpy.org', 443, '/')),
-    ('afpyro', HTTPPing('afpy.ro', 80, '/faq.html')),
+    ('afpyro', HTTPPing('afpyro.afpy.org', 80, '/faq.html')),
     ('pycon', HTTPPing('www.pycon.fr', 80, '/2013/')),
     ('logs', HTTPPing('logs.afpy.org', 80, '/')),
     ('fld', HTTPPing('front-de-liberation-des-developpeurs.org', 80, '/')),
