@@ -6,6 +6,7 @@ dist
 eggs
 parts
 var/
+irc3/
 develop-eggs
 docs/_build/
 docs/modules/
