@@ -17,7 +17,10 @@ class Alain(object):
         self.bot = bot
         self.session = requests.Session()
         self.plone = requests.Session()
-        self.plone.auth = tuple(self.bot.config.alain['plone'].split(':'))
+        try:
+            self.plone.auth = tuple(self.bot.config.alain['plone'].split(':'))
+        except:
+            pass
 
     @irc3.event(irc3.rfc.JOIN)
     def matin(self, mask=None, **kw):
@@ -64,8 +67,9 @@ class Alain(object):
                 break
         try:
             if name in ('alain', 'members'):
-                supervisor = sh['/home/afpy/AfpySupervisor/bin/supervisorctl']
-                for line in supervisor('restart', name, combine_stderr=True):
+                supervisor = sh['/usr/bin/sudo']
+                for line in supervisor('/usr/bin/supervisorctl restart',
+                                       name, combine_stderr=True):
                     yield line
             elif name == 'docs':
                 pwd = sh.pwd()
