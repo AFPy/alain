@@ -20,8 +20,9 @@ class Alain(object):
         self.plone.auth = tuple(self.bot.config.alain['plone'].split(':'))
 
     @irc3.event(irc3.rfc.JOIN)
-    def matin(self, **kw):
-        self.bot.privmsg(self.bot.config.channel, 'matin')
+    def matin(self, mask=None, **kw):
+        if mask.nick.startswith(self.bot.nick):
+            self.bot.privmsg(self.bot.config.channel, 'matin')
 
     @irc3.event(':(?P<mask>\S+) PRIVMSG {channel} :(lol|mdr)$')
     def lol(self, mask=None, channel=None, data=None):
