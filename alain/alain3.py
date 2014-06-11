@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from irc3.plugins.command import command
 from irc3.plugins.cron import cron
+from irc3.plugins.social import Social
+from irc3.plugins.social import TwitterAdapter
 from datetime import datetime
 from chut import sh
 import feedparser
@@ -139,6 +141,43 @@ class Alain(object):
         """
         for msg in self.afpyro_cron(force=True):
             yield msg
+
+
+@irc3.plugin
+class AfpySocial(Social):
+
+    default_network = 'twitter'
+    networks = dict(
+        alain=dict(
+            adapter=TwitterAdapter,
+            factory='twitter.TwitterStream',
+            auth_factory='twitter.OAuth',
+            domain='stream.twitter.com',
+            api_version='1.1',
+            secure=True
+        ),
+        pycon=dict(
+            adapter=TwitterAdapter,
+            factory='twitter.TwitterStream',
+            auth_factory='twitter.OAuth',
+            domain='stream.twitter.com',
+            api_version='1.1',
+            secure=True
+        ),
+    )
+
+    @command(permission='edit')
+    def tweet(self, mask, target, args):
+        """Post to twitter
+
+            %%tweet <message>...
+        """
+        #    %%tweet (alain|pycon) <message>...
+        if args['pycon']:
+            args['--id'] = 'pycon'
+        else:
+            args['--id'] = 'alain'
+        self.tweet(mask, target, args)
 
 
 @irc3.plugin
