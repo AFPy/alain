@@ -150,17 +150,17 @@ class AfpySocial(Social):
     networks = dict(
         alain=dict(
             adapter=TwitterAdapter,
-            factory='twitter.TwitterStream',
+            factory='twitter.Twitter',
             auth_factory='twitter.OAuth',
-            domain='stream.twitter.com',
+            domain='api.twitter.com',
             api_version='1.1',
             secure=True
         ),
         pycon=dict(
             adapter=TwitterAdapter,
-            factory='twitter.TwitterStream',
+            factory='twitter.Twitter',
             auth_factory='twitter.OAuth',
-            domain='stream.twitter.com',
+            domain='api.twitter.com',
             api_version='1.1',
             secure=True
         ),
