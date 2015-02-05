@@ -170,14 +170,14 @@ class AfpySocial(Social):
     def tweet(self, mask, target, args):
         """Post to twitter
 
-            %%tweet <message>...
+            %%tweet [pycon] <message>...
         """
         #    %%tweet (alain|pycon) <message>...
         if args['pycon']:
             args['--id'] = 'pycon'
         else:
             args['--id'] = 'alain'
-        self.tweet(mask, target, args)
+        super(AfpySocial, self).tweet(mask, target, args)
 
 
 @irc3.plugin
