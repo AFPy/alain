@@ -16,6 +16,7 @@ import irc3
 class Alain(object):
 
     def __init__(self, bot):
+        bot.config['channel'] = irc3.utils.as_channel(bot.config.channel)
         self.bot = bot
         self.session = requests.Session()
         self.plone = requests.Session()
