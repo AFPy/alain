@@ -196,7 +196,7 @@ class Mon(object):
                            **bot.config.get('irc3.plugins.mon', {}))
         self.log = logging.getLogger('irc3.plugins.mon')
         self.irc = logging.getLogger('irc.mon')
-        self.irc.set_irc_targets(bot, self.config['channel'])
+        self.irc.set_irc_targets(bot, self.bot.config['channel'])
         self.states = {}
         self.notify_after = int(self.config['notify_after'])
         self.verify = bool(self.config['verify'] == 'true')
