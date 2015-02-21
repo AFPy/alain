@@ -243,3 +243,17 @@ class Mon(object):
             elif state and state % (self.notify_after * 3) == 0:
                 self.irc.error('{0}({1}) {2}'.format(name, state, resp))
             self.states[name] = state
+
+
+def feed_dispatcher(bot):
+    call_later = bot.loop.call_later
+    send_tweet = bot.get_plugin(AfpySocial).send_tweet
+
+    def dispatcher(messages):
+        for i, (c, m) in enumerate(messages):
+            if 'Biologeek' in m:
+                continue
+            bot.log.info('Sending %r', m)
+            # call_later(i + 1, bot.privmsg, c, m)
+            call_later(i + 1, send_tweet, m, 'alain')
+    return dispatcher
