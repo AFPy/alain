@@ -181,6 +181,10 @@ class AfpySocial(Social):
             args['--id'] = 'alain'
         super(AfpySocial, self).tweet(mask, target, args)
 
+    def send_alain_tweet(self, message):
+        for name, status in self.send_tweet(message, id='alain'):
+            self.bot.log.info('[tweet] %s: %s', name, status)
+
 
 @irc3.plugin
 class Mon(object):
@@ -247,8 +251,8 @@ class Mon(object):
 
 
 def feed_dispatcher(bot):
+    send_tweet = bot.get_plugin(AfpySocial).send_alain_tweet
     call_later = bot.loop.call_later
-    send_tweet = bot.get_plugin(AfpySocial).send_tweet
 
     def dispatcher(messages):
         for i, (c, m) in enumerate(messages):
@@ -256,5 +260,5 @@ def feed_dispatcher(bot):
                 continue
             bot.log.info('Sending %r', m)
             # call_later(i + 1, bot.privmsg, c, m)
-            call_later(i + 1, send_tweet, m, 'alain')
+            call_later(i + 1, send_tweet, m)
     return dispatcher
