@@ -56,7 +56,7 @@ class Alain(object):
         entries = [str(e.id) for e in feed.entries]
         entries = [e for e in entries if '/forums/' not in e]
         if entries:
-            msg = 'Hey! Il y a des trucs à modérer: %s' % ' - '.join(entries)
+            msg = u'Hey! Il y a des trucs à modérer: %s' % ' - '.join(entries)
             self.bot.log.info('%r', msg)
             self.bot.privmsg(self.bot.config.channel, msg)
 
