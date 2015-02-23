@@ -10,6 +10,7 @@ import requests
 import logging
 import random
 import irc3
+import re
 
 
 @irc3.plugin
@@ -248,6 +249,18 @@ class Mon(object):
             elif state and state % (self.notify_after * 3) == 0:
                 self.irc.error('{0}({1}) {2}'.format(name, state, resp))
             self.states[name] = state
+
+# feeds
+
+_afpy_date = re.compile(
+    r'(\d{4})/(\d{2})/(\d{2}) (\d{,2}):(\d{2}):(\d{2})')
+
+
+def afpy_date(dt):
+    """parse a UTC date in MM/DD/YYYY HH:MM:SS format"""
+    g = _afpy_date.search(dt).groups()
+    return tuple([int(i) for i in g] + [0, 0, 0])
+feedparser.registerDateHandler(afpy_date)
 
 
 def feed_dispatcher(bot):
