@@ -3,7 +3,9 @@ from irc3.plugins.command import command
 from irc3.plugins.cron import cron
 from irc3.plugins.social import Social
 from irc3.plugins.social import TwitterAdapter
+from irc3.compat import asyncio
 from datetime import datetime
+from functools import partial
 from chut import sh
 import feedparser
 import requests
@@ -223,32 +225,37 @@ class Mon(object):
                 return resp
     check_https = check_http
 
+    @asyncio.coroutine
     def check(self):
         for name, url in self.config.items():
-            if not isinstance(url, str):
-                continue
+            url = str(url)
             if '://' not in url:
                 continue
             callback = getattr(self, 'check_' + url.split('://', 1)[0])
-            state = self.states.setdefault(name, 0)
-            self.log.debug('{0} state: {1}.'.format(name, state))
-            resp = callback(url)
-            if resp is None:
-                if state >= self.notify_after:
-                    self.irc.info('{0} fixed'.format(name))
-                state = 0
+            self.log.debug('Checking %s %s', name, url)
+            task = self.bot.loop.run_in_executor(None, callback, url)
+            task.add_done_callback(partial(self.check_callback, name))
+
+    def check_callback(self, name, future):
+        state = self.states.setdefault(name, 0)
+        self.log.debug('{0} state: {1}.'.format(name, state))
+        resp = future.result()
+        if resp is None:
+            if state >= self.notify_after:
+                self.irc.info('{0} fixed'.format(name))
+            state = 0
+        else:
+            self.log.error('Error while checking {0}.'.format(name))
+            if isinstance(resp, Exception):
+                self.log.exception(resp)
             else:
-                self.log.error('Error while checking {0}.'.format(name))
-                if isinstance(resp, Exception):
-                    self.log.exception(resp)
-                else:
-                    self.log.error(resp)
-                state += 1
-            if state == self.notify_after:
-                self.irc.error('{0}({1}) {2}'.format(name, state, resp))
-            elif state and state % (self.notify_after * 3) == 0:
-                self.irc.error('{0}({1}) {2}'.format(name, state, resp))
-            self.states[name] = state
+                self.log.error(resp)
+            state += 1
+        if state == self.notify_after:
+            self.irc.error('{0}({1}) {2}'.format(name, state, resp))
+        elif state and state % (self.notify_after * 3) == 0:
+            self.irc.error('{0}({1}) {2}'.format(name, state, resp))
+        self.states[name] = state
 
 # feeds
 
