@@ -259,14 +259,22 @@ class Mon(object):
 
 # feeds
 
-_afpy_date = re.compile(
-    r'(\d{4})/(\d{2})/(\d{2}) (\d{,2}):(\d{2}):(\d{2})')
+_afpy_dates = [
+    re.compile(r'(\d{4})/(\d{2})/(\d{2}) (\d{,2}):(\d{2}):(\d{2})'),
+    re.compile(r'(\d{4})-(\d{2})-(\d{2}) (\d{,2}):(\d{2}):(\d{2})'),
+]
 
 
 def afpy_date(dt):
     """parse a UTC date in MM/DD/YYYY HH:MM:SS format"""
-    g = _afpy_date.search(dt).groups()
-    return tuple([int(i) for i in g] + [0, 0, 0])
+    g = None
+    for afpy_date in _afpy_dates:
+        try:
+            g = afpy_date.search(dt).groups()
+        except:
+            pass
+    if g:
+        return tuple([int(i) for i in g] + [0, 0, 0])
 feedparser.registerDateHandler(afpy_date)
 
 
