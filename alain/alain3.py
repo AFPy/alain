@@ -284,9 +284,8 @@ def feed_dispatcher(bot):
 
     def dispatcher(messages):
         for i, (c, m) in enumerate(messages):
-            if 'Biologeek' in m:
-                continue
-            bot.log.info('Sending %r', m)
-            # call_later(i + 1, bot.privmsg, c, m)
-            call_later(i + 1, send_tweet, m)
+            if u'afpy' in m.lower():
+                bot.log.info('Sending %r', m)
+                # call_later(i + 1, bot.privmsg, c, m)
+                call_later(i + 1, send_tweet, m)
     return dispatcher
