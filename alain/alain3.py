@@ -48,7 +48,7 @@ class Alain(object):
         ':(?i)(?P<mask>\S+) PRIVMSG {channel} :.*\sapprendre.*python.*')
     def tutorial(self, mask=None, channel=None, data=None):
         message = (
-            '''Pour apprendre python vous pouvez commencer par ici:'''
+            '''Pour apprendre python vous pouvez commencer par ici: '''
             'http://www.afpy.org/doc/python/3.5/tutorial/index.html'
         )
         self.bot.privmsg(self.bot.config.channel, message)
