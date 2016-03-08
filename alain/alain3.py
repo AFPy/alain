@@ -44,6 +44,15 @@ class Alain(object):
         message = 'WARNING !!! YAKAFOKON DETECTED !!!!'
         self.bot.privmsg(self.bot.config.channel, message)
 
+    @irc3.event(
+        ':(?i)(?P<mask>\S+) PRIVMSG {channel} :.*\sapprendre.*python.*')
+    def tutorial(self, mask=None, channel=None, data=None):
+        message = (
+            '''Pour apprendre python vous pouvez commencer par ici:'''
+            'http://www.afpy.org/doc/python/3.5/tutorial/index.html'
+        )
+        self.bot.privmsg(self.bot.config.channel, message)
+
     @irc3.event(':(?P<mask>\S+) PRIVMSG {channel} :.*\soffre.*emploi.*')
     def job(self, mask=None, channel=None, data=None):
         message = (
