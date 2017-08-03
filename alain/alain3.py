@@ -72,42 +72,6 @@ class Alain(object):
             self.bot.log.info('%r', msg)
             self.bot.privmsg(self.bot.config.channel, msg)
 
-    @command(permission='admin')
-    def restart(self, mask, target, args):
-        """Restart a service
-
-            %%restart (alain|members|docs|plone)
-        """
-        for name in ('alain', 'members', 'docs', 'plone'):
-            if args.get(name):
-                break
-        try:
-            if name in ('alain', 'members'):
-                supervisor = sh['/usr/bin/sudo']
-                for line in supervisor('/usr/bin/supervisorctl restart',
-                                       name, combine_stderr=True):
-                    yield line
-            elif name == 'docs':
-                pwd = sh.pwd()
-                sh.cd('/home/afpy/AfpySphinx/docs')
-                if not sh['hg']('pull -u'):
-                    yield 'Failed to update code'
-                else:
-                    res = sh['make']('html').succeeded
-                    sh.cd(pwd)
-                    if res:
-                        yield 'Docs build success'
-                    else:
-                        yield 'Docs build failure'
-            elif name == 'plone':
-                plone = sh['/home/afpy/afpy2012/plone/zinstance/bin/plonectl']
-                for line in plone('restart', combine_stderr=True):
-                    yield line
-            else:
-                yield 'moi pas connaitre %s' % name
-        except OSError as e:
-            yield repr(e)
-
     def incoming_afpyros(self):
         feed = feedparser.parse(self.session.get(
             'http://afpyro.afpy.org/afpyro.rss').text)
@@ -197,74 +161,6 @@ class AfpySocial(Social):
         for name, status in self.send_tweet(message, id='alain'):
             self.bot.log.info('[tweet] %s: %s', name, status)
 
-
-@irc3.plugin
-class Mon(object):
-
-    requires = ['irc3.plugins.cron']
-    defaults = dict(
-        cron='*/3 * * * *',
-        notify_after=2,
-        verify='true',
-        timeout=10)
-
-    def __init__(self, bot):
-        self.bot = bot
-        self.config = dict(self.defaults,
-                           **bot.config.get('irc3.plugins.mon', {}))
-        self.log = logging.getLogger('irc3.plugins.mon')
-        self.irc = logging.getLogger('irc.mon')
-        self.irc.set_irc_targets(bot, self.bot.config['channel'])
-        self.states = {}
-        self.notify_after = int(self.config['notify_after'])
-        self.verify = bool(self.config['verify'] == 'true')
-        self.timeout = int(self.config['timeout'])
-        self.bot.add_cron(self.config['cron'], self.check)
-
-    def check_http(self, url):
-        session = requests.Session()
-        try:
-            resp = session.get(url,
-                               timeout=self.timeout,
-                               verify=self.verify)
-        except Exception as resp:
-            return resp
-        else:
-            if resp.status_code != 200:
-                return resp
-    check_https = check_http
-
-    @asyncio.coroutine
-    def check(self):
-        for name, url in self.config.items():
-            url = str(url)
-            if '://' not in url:
-                continue
-            callback = getattr(self, 'check_' + url.split('://', 1)[0])
-            self.log.debug('Checking %s %s', name, url)
-            task = self.bot.loop.run_in_executor(None, callback, url)
-            task.add_done_callback(partial(self.check_callback, name))
-
-    def check_callback(self, name, future):
-        state = self.states.setdefault(name, 0)
-        self.log.debug('{0} state: {1}.'.format(name, state))
-        resp = future.result()
-        if resp is None:
-            if state >= self.notify_after:
-                self.irc.info('{0} fixed'.format(name))
-            state = 0
-        else:
-            self.log.error('Error while checking {0}.'.format(name))
-            if isinstance(resp, Exception):
-                self.log.exception(resp)
-            else:
-                self.log.error(resp)
-            state += 1
-        if state == self.notify_after:
-            self.irc.error('{0}({1}) {2}'.format(name, state, resp))
-        elif state and state % (self.notify_after * 3) == 0:
-            self.irc.error('{0}({1}) {2}'.format(name, state, resp))
-        self.states[name] = state
 
 # feeds
 
