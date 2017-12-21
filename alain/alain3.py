@@ -49,7 +49,7 @@ class Alain(object):
     def tutorial(self, mask=None, channel=None, data=None):
         message = (
             '''Pour apprendre python vous pouvez commencer par ici: '''
-            'http://www.afpy.org/doc/python/3.5/tutorial/index.html'
+            'https://docs.python.org/fr/3/tutorial/index.html'
         )
         self.bot.privmsg(self.bot.config.channel, message)
 
