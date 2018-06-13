@@ -14,15 +14,16 @@ AFPy's IRC bot""",
       author_email='gawel@afpy.org',
       url='https://hg.afpy.org/gawel/alain/index.html',
       license='MIT',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      packages=find_packages('src/'),
+      package_dir={'': 'src/'},
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-          # -*- Extra requirements: -*-
+          'irc3',
       ],
-      entry_points="""
-      # -*- Entry points: -*-
-      [console_scripts]
-      alain = alain.main:main
-      """,
-      )
+      entry_points={
+          'console_scripts': [
+              'alain = alain.alain3'
+          ]
+      },
+)
