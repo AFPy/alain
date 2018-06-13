@@ -20,10 +20,8 @@ AFPy's IRC bot""",
       zip_safe=False,
       install_requires=[
           'irc3',
+          'chut',
+          'feedparser',
+          'requests',
       ],
-      entry_points={
-          'console_scripts': [
-              'alain = alain.alain3'
-          ]
-      },
 )
