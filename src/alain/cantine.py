@@ -11,10 +11,10 @@ def check_page(url):
         line = line.strip()
         if '<ul class="inscriptions"' in line:
             in_inscriptions = True
-        elif '</ul>' in line:
+        elif "</ul>" in line:
             in_inscriptions = False
         elif in_inscriptions:
-            match = re.search('<li>(.*)</li>', line)
+            match = re.search("<li>(.*)</li>", line)
             registered.append(match.groups()[0])
     return len(set(registered))
 
