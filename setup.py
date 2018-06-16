@@ -19,7 +19,7 @@ AFPy's IRC bot""",
     package_dir={"": "src/"},
     include_package_data=True,
     zip_safe=False,
-    install_requires=["irc3", "chut", "feedparser", "requests", "twitter"],
+    install_requires=["irc3", "chut", "feedparser", "requests", "twitter", "aiocron"],
     extras_require={
         "dev": [
             "flake8",
