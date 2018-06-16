@@ -2,6 +2,8 @@
 
 `alain_afpy` est le bot du salon #afpy sur freenode.
 
+![](http://www.gawel.org/thumbnails/alain_at_rennes_blog.jpg)
+
 
 ## Tester
 
