@@ -32,3 +32,8 @@ de mettre à jour ce déploiement via :
     $ git pull --ff-only
     $ exit
     # supervisorctl restart alain
+
+
+Le `git pull --ff-only` passe trauqillement parce qu'alain a sa propre
+clef SSH en clef de déploiement côté github, c.f. :
+https://github.com/AFPy/alain/settings/keys.
