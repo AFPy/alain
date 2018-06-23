@@ -56,6 +56,15 @@ class Alain(object):
         )
         self.bot.privmsg(self.bot.config.channel, message)
 
+    @cron("10 9,11,14,17,20 * * *")
+    def awaiting_review(self):
+        status = self.session.get("https://www.afpy.org/status").json()
+        todo = status["actualites"]["waiting"] + status["emplois"]["waiting"]
+        if todo:
+            msg = f"Hey! Il y a {todo} trucs à modérer !"
+            self.bot.log.info("%r", msg)
+            self.bot.privmsg(self.bot.config.channel, msg)
+
     def incoming_afpyros(self):
         feed = feedparser.parse(
             self.session.get("http://afpyro.afpy.org/afpyro.rss").text
