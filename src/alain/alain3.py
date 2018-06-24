@@ -51,7 +51,7 @@ class Alain(object):
     def job(self, mask=None, channel=None, data=None):
         self.bot.privmsg(
             self.bot.config.channel,
-            "Pour poster une offre d'emploi veuillez consultez : "
+            "Pour poster une offre d'emploi veuillez consulter : "
             "https://www.afpy.org/post/edit/emplois",
         )
 
