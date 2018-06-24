@@ -30,6 +30,7 @@ de mettre à jour ce déploiement via :
     # su - alain
     $ cd ~/alain/
     $ git pull --ff-only
+    $ python3.6 -m pip install --user --upgrade .
     $ exit
     # supervisorctl restart alain
 
