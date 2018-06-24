@@ -49,12 +49,11 @@ class Alain(object):
 
     @irc3.event(r":(?P<mask>\S+) PRIVMSG {channel} :.*\soffre.*emploi.*")
     def job(self, mask=None, channel=None, data=None):
-        message = (
-            """Pour poster une offre d'emploi veuillez consulter:"""
-            " http://www.afpy.org/doc/afpy/faq.html"
-            "#comment-puis-je-poster-une-offre-d-emploi"
+        self.bot.privmsg(
+            self.bot.config.channel,
+            "Pour poster une offre d'emploi veuillez consultez : "
+            "https://www.afpy.org/post/edit/emplois",
         )
-        self.bot.privmsg(self.bot.config.channel, message)
 
     @cron("10 9,11,14,17,20 * * *")
     def awaiting_review(self):
