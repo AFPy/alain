@@ -4,7 +4,7 @@ You can run it using `irc3 alain.ini`.
 """
 import random
 import re
-from datetime import date
+from datetime import date, datetime, timedelta
 
 import feedparser
 import requests
@@ -19,6 +19,7 @@ class Alain(object):
     def __init__(self, bot):
         bot.config["channel"] = irc3.utils.as_channel(bot.config.channel)
         self.bot = bot
+        self.last_awaiting_review = datetime(1970, 1, 1)
         self.session = requests.Session()
 
     @irc3.event(irc3.rfc.JOIN)
@@ -55,14 +56,36 @@ class Alain(object):
             "https://www.afpy.org/post/edit/emplois",
         )
 
-    @cron("10 9,11,14,17,20 * * *")
+    @cron("*/10 9-21 * * *")
     def awaiting_review(self):
         status = self.session.get("https://www.afpy.org/status").json()
         todo = status["actualites"]["waiting"] + status["emplois"]["waiting"]
-        if todo:
-            msg = f"Hey! Il y a {todo} trucs à modérer !"
+        if todo and self.last_awaiting_review + timedelta(hours=2) < datetime.now():
+            self.last_awaiting_review = datetime.now()
+            msg = f"Hey cyp et mdk ! Il y a {todo} trucs à modérer !"
             self.bot.log.info("%r", msg)
             self.bot.privmsg(self.bot.config.channel, msg)
+
+    @irc3.event(irc3.rfc.MY_PRIVMSG)
+    def got_privmsg(self, mask=None, event=None, target=None, data=None, **kw):
+        if "done" in data and self.last_awaiting_review > datetime.now() - timedelta(
+            hours=2
+        ):
+            self.last_awaiting_review = datetime(1970, 1, 1)
+            self.bot.privmsg(
+                self.bot.config.channel,
+                random.choice(
+                    [
+                        "thx",
+                        "thx bro",
+                        "merci",
+                        "merci !",
+                        "merci vieux",
+                        "c'est pas trop tôt",
+                        "thanks, man!",
+                    ]
+                ),
+            )
 
     def incoming_afpyros(self):
         feed = feedparser.parse(
