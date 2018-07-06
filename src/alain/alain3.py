@@ -59,10 +59,18 @@ class Alain(object):
     @cron("*/10 9-21 * * *")
     def awaiting_review(self):
         status = self.session.get("https://www.afpy.org/status").json()
-        todo = status["actualites"]["waiting"] + status["emplois"]["waiting"]
+        admin_urls = {
+            "actualites": "https://www.afpy.org/admin/posts/actualites",
+            "emplois": "https://www.afpy.org/admin/posts/emplois",
+        }
+        todo = [
+            admin_urls[post_type]
+            for post_type in admin_urls
+            if status[post_type]["waiting"]
+        ]
         if todo and self.last_awaiting_review + timedelta(hours=2) < datetime.now():
             self.last_awaiting_review = datetime.now()
-            msg = f"Hey cyp et mdk ! Il y a {todo} trucs à modérer !"
+            msg = f"Hey les modos, {', '.join(todo)} ! (CC cyp & mdk)"
             self.bot.log.info("%r", msg)
             self.bot.privmsg(self.bot.config.channel, msg)
 
