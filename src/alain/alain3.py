@@ -76,9 +76,9 @@ class Alain(object):
 
     @irc3.event(irc3.rfc.MY_PRIVMSG)
     def got_privmsg(self, mask=None, event=None, target=None, data=None, **kw):
-        if "done" in data and self.last_awaiting_review > datetime.now() - timedelta(
-            hours=2
-        ):
+        if any(
+            done in data for done in {"done", "fait"}
+        ) and self.last_awaiting_review > datetime.now() - timedelta(hours=2):
             self.last_awaiting_review = datetime(1970, 1, 1)
             self.bot.privmsg(
                 self.bot.config.channel,
