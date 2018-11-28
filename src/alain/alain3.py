@@ -14,6 +14,14 @@ from irc3.plugins.cron import cron
 from irc3.plugins.social import Social, TwitterAdapter
 
 
+THANKS_WORDS = [
+    " ".join((begin, mid, end)).strip()
+    for begin in ["thx", "merci", "thanks", "Merci"]
+    for mid in ["", "bro", "vieux"]
+    for end in ["", "!", ":)", "♥", "!!", "☺"]
+]
+
+
 @irc3.plugin
 class Alain(object):
     def __init__(self, bot):
@@ -80,20 +88,7 @@ class Alain(object):
             done in data for done in {"done", "fait"}
         ) and self.last_awaiting_review > datetime.now() - timedelta(hours=2):
             self.last_awaiting_review = datetime(1970, 1, 1)
-            self.bot.privmsg(
-                self.bot.config.channel,
-                random.choice(
-                    [
-                        "thx",
-                        "thx bro",
-                        "merci",
-                        "merci !",
-                        "merci vieux",
-                        "c'est pas trop tôt",
-                        "thanks, man!",
-                    ]
-                ),
-            )
+            self.bot.privmsg(self.bot.config.channel, random.choice(THANKS_WORDS))
 
     def incoming_afpyros(self):
         feed = feedparser.parse(
