@@ -27,7 +27,7 @@ AFPy's IRC bot""",
             "astroid==2.0.0.dev",  # Don't work on py37 without v2
             "pytest",
             "pytest-cov",
-            "detox",
+            "tox",
             "bandit",
             "black",
             "mypy",

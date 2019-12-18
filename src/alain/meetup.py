@@ -11,7 +11,7 @@ def fetch(items):
     session = requests.Session()
     for item in items:
         item.update(country="fr", key="43e6870567c1a23503117b756118c")
-        time.sleep(.5)
+        time.sleep(0.5)
         resp = session.get(URL + "&".join(["%s=%s" % i for i in item.items()]))
         data = resp.json()["results"]
         for result in data:
@@ -19,7 +19,7 @@ def fetch(items):
     return sorted(results.items(), reverse=True)
 
 
-class Meetup(object):
+class Meetup:
 
     cities = ("paris", "lyon", "nantes")
     topics = ("python", "django")

@@ -23,7 +23,7 @@ THANKS_WORDS = [
 
 
 @irc3.plugin
-class Alain(object):
+class Alain:
     def __init__(self, bot):
         bot.config["channel"] = irc3.utils.as_channel(bot.config.channel)
         self.bot = bot
@@ -88,7 +88,9 @@ class Alain(object):
             done in data for done in {"done", "fait"}
         ) and self.last_awaiting_review > datetime.now() - timedelta(hours=2):
             self.last_awaiting_review = datetime(1970, 1, 1)
-            self.bot.privmsg(self.bot.config.channel, random.choice(THANKS_WORDS))
+            self.bot.privmsg(
+                self.bot.config.channel, random.choice(THANKS_WORDS)  # nosec
+            )
 
     def incoming_afpyros(self):
         feed = feedparser.parse(

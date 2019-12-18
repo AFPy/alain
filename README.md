@@ -18,7 +18,7 @@ Pour le lancer localement :
 
 Avant de commit vous pouvez passer quelques tests via :
 
-    $ detox
+    $ tox -p all
 
 
 ## Déployer
