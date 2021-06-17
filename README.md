@@ -1,6 +1,6 @@
 # Alain
 
-`alain_afpy` est le bot du salon #afpy sur freenode.
+`alain_afpy` est le bot du salon #afpy sur [Libera](https://libera.chat).
 
 ![](http://www.gawel.org/thumbnails/alain_at_rennes_blog.jpg)
 
