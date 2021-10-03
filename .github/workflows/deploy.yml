@@ -1,0 +1,28 @@
+---
+
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Deploy
+        env:
+          deploy_key: ${{secrets.deploy_key}}
+          known_hosts: ${{secrets.known_hosts}}
+        run: |
+          mkdir -p ${HOME}/.ssh
+          printf "%s\n" "$known_hosts" > ${HOME}/.ssh/known_hosts
+          printf "%s\n" "$deploy_key" > ${HOME}/.ssh/id_ed25519
+          chmod 600 ${HOME}/.ssh/id_ed25519
+          eval $(ssh-agent)
+          ssh-add
+          rsync -a ./ alain@deb.afpy.org:/home/alain/src/
+          ssh alain@deb.afpy.org /home/alain/venv/bin/python -m pip install --upgrade pip
+          ssh alain@deb.afpy.org /home/alain/venv/bin/python -m pip install --upgrade /home/alain/src/
+          ssh alain@deb.afpy.org sudo systemctl restart alain.service
