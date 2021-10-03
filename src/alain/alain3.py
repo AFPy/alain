@@ -61,7 +61,7 @@ class Alain:
         self.bot.privmsg(
             self.bot.config.channel,
             "Pour poster une offre d'emploi veuillez consulter : "
-            "https://www.afpy.org/post/edit/emplois",
+            "https://www.afpy.org/emplois/new",
         )
 
     @cron("*/10 9-21 * * *")
