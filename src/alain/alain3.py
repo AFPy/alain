@@ -60,16 +60,16 @@ class Alain:
     def job(self, mask=None, channel=None, data=None):
         self.bot.privmsg(
             self.bot.config.channel,
-            "Pour poster une offre d'emploi veuillez consulter : "
-            "https://www.afpy.org/post/edit/emplois",
+            "Pour poster une offre d'emploi, c'est par là : "
+            "https://www.afpy.org/emplois/new",
         )
 
-    @cron("*/10 9-21 * * *")
+    @cron("*/5 9-21 * * *")
     def awaiting_review(self):
         status = self.session.get("https://www.afpy.org/status").json()
         admin_urls = {
-            "actualites": "https://www.afpy.org/admin/posts/actualites",
-            "emplois": "https://www.afpy.org/admin/posts/emplois",
+            "actualites": "https://www.afpy.org/admin/moderation/news",
+            "emplois": "https://www.afpy.org/admin/moderation/jobs",
         }
         todo = [
             admin_urls[post_type]
@@ -78,7 +78,7 @@ class Alain:
         ]
         if todo and self.last_awaiting_review + timedelta(hours=2) < datetime.now():
             self.last_awaiting_review = datetime.now()
-            msg = f"Hey les modos, {', '.join(todo)} ! (CC cyp & mdk & seluj78)"
+            msg = f"cyp, mdk, seluj78: {', '.join(todo)} !"
             self.bot.log.info("%r", msg)
             self.bot.privmsg(self.bot.config.channel, msg)
 
