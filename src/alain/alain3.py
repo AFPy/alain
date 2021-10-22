@@ -78,7 +78,7 @@ class Alain:
         ]
         if todo and self.last_awaiting_review + timedelta(hours=2) < datetime.now():
             self.last_awaiting_review = datetime.now()
-            msg = f"cyp, mdk, seluj78: {', '.join(todo)} !"
+            msg = f"debnet, cyp, mdk, seluj78: {', '.join(todo)} !"
             self.bot.log.info("%r", msg)
             self.bot.privmsg(self.bot.config.channel, msg)
 
