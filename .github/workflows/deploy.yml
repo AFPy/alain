@@ -20,9 +20,7 @@ jobs:
           printf "%s\n" "$known_hosts" > ${HOME}/.ssh/known_hosts
           printf "%s\n" "$deploy_key" > ${HOME}/.ssh/id_ed25519
           chmod 600 ${HOME}/.ssh/id_ed25519
-          eval $(ssh-agent)
-          ssh-add
-          rsync -a ./ alain@deb.afpy.org:/home/alain/src/
-          ssh alain@deb.afpy.org /home/alain/venv/bin/python -m pip install --upgrade pip
-          ssh alain@deb.afpy.org /home/alain/venv/bin/python -m pip install --upgrade /home/alain/src/
-          ssh alain@deb.afpy.org sudo systemctl restart alain.service
+          rsync -a ./ alain@deb2.afpy.org:/home/alain/src/
+          ssh alain@deb2.afpy.org /home/alain/venv/bin/python -m pip install --upgrade pip
+          ssh alain@deb2.afpy.org /home/alain/venv/bin/python -m pip install --upgrade /home/alain/src/
+          ssh alain@deb2.afpy.org sudo systemctl restart alain.service
