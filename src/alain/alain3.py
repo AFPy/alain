@@ -68,8 +68,8 @@ class Alain:
     def awaiting_review(self):
         status = self.session.get("https://www.afpy.org/status").json()
         admin_urls = {
-            "actualites": "https://www.afpy.org/admin/moderation/news",
-            "emplois": "https://www.afpy.org/admin/moderation/jobs",
+            "actualites": "https://www.afpy.org/admin/news_moderation/",
+            "emplois": "https://www.afpy.org/admin/jobs_moderation/",
         }
         todo = [
             admin_urls[post_type]
