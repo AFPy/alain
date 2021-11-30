@@ -13,14 +13,23 @@ jobs:
       - uses: actions/checkout@v1
       - name: Deploy
         env:
-          deploy_key: ${{secrets.deploy_key}}
-          known_hosts: ${{secrets.known_hosts}}
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_TOKEN: ${{ secrets.TWITTER_TOKEN }}
+          TWITTER_TOKEN_SECRET: ${{ secrets.TWITTER_TOKEN_SECRET }}
         run: |
           mkdir -p ${HOME}/.ssh
-          printf "%s\n" "$known_hosts" > ${HOME}/.ssh/known_hosts
-          printf "%s\n" "$deploy_key" > ${HOME}/.ssh/id_ed25519
+          printf "%s\n" "$KNOWN_HOSTS" > ${HOME}/.ssh/known_hosts
+          printf "%s\n" "$DEPLOY_KEY" > ${HOME}/.ssh/id_ed25519
           chmod 600 ${HOME}/.ssh/id_ed25519
+          sed -i "s/TWITTER_KEY/$TWITTER_API_KEY/" alain.ini
+          sed -i "s/TWITTER_SECRET/$TWITTER_API_SECRET/" alain.ini
+          sed -i "s/TWITTER_TOKEN/$TWITTER_TOKEN/" alain.ini
+          sed -i "s/TWITTER_TOKEN_SECRET/$TWITTER_TOKEN_SECRET/" alain.ini
           rsync -a ./ alain@deb2.afpy.org:/home/alain/src/
-          ssh alain@deb2.afpy.org /home/alain/venv/bin/python -m pip install --upgrade pip
-          ssh alain@deb2.afpy.org /home/alain/venv/bin/python -m pip install --upgrade /home/alain/src/
-          ssh alain@deb2.afpy.org sudo systemctl restart alain.service
+          ssh alain@deb2.afpy.org '
+            /home/alain/venv/bin/python -m pip install --upgrade pip;
+            /home/alain/venv/bin/python -m pip install --upgrade /home/alain/src/;
+            sudo systemctl restart alain.service'

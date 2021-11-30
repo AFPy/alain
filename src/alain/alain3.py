@@ -134,7 +134,7 @@ class Alain:
     def afpyro(self, *_args, **_kwargs):
         """Show incoming afpyro
 
-            %%afpyro
+        %%afpyro
         """
         for msg in self.afpyro_cron(force=True):
             yield msg
@@ -165,9 +165,9 @@ class AfpySocial(Social):
 
     @command(permission="edit")
     def tweet(self, mask, target, args):
-        """Post to twitter
+        """Post to twitter.
 
-            %%tweet [pycon] <message>...
+        %%tweet [pycon] <message>...
         """
         #    %%tweet (alain|pycon) <message>...
         if args["pycon"]:
