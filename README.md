@@ -23,18 +23,7 @@ Avant de commit vous pouvez passer quelques tests via :
 
 ## Déployer
 
-Alain est déployé dans la jail `alain` sur rainette, il est possible
-de mettre à jour ce déploiement via :
-
-    # jexec alain
-    # su - alain
-    $ cd ~/alain/
-    $ git pull --ff-only
-    $ python3.6 -m pip install --user --upgrade .
-    $ exit
-    # supervisorctl restart alain
-
-
-Le `git pull --ff-only` passe trauqillement parce qu'alain a sa propre
-clef SSH en clef de déploiement côté github, c.f. :
-https://github.com/AFPy/alain/settings/keys.
+Alain est déployé sur deb2.afpy.org via ansible
+(cf. [alain.yml](https://github.com/AFPy/infra/blob/main/alain.yml)
+et mis à jour automatiquement au push
+(cf. [deploy.yml](https://github.com/AFPy/alain/blob/main/.github/workflows/deploy.yml).
