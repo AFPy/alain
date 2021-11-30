@@ -23,7 +23,7 @@ Avant de commit vous pouvez passer quelques tests via :
 
 ## Déployer
 
-Alain est déployé sur deb2.afpy.org via ansible
-(cf. [alain.yml](https://github.com/AFPy/infra/blob/main/alain.yml)
+Alain est déployé sur deb2.afpy.org via Ansible
+(cf. [alain.yml](https://github.com/AFPy/infra/blob/main/alain.yml))
 et mis à jour automatiquement au push
-(cf. [deploy.yml](https://github.com/AFPy/alain/blob/main/.github/workflows/deploy.yml).
+(cf. [deploy.yml](https://github.com/AFPy/alain/blob/main/.github/workflows/deploy.yml)).
