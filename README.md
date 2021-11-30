@@ -10,7 +10,7 @@
 Pour tester localement, dans un venv, installez alain avec (ou pas)
 ses dépendances de dev :
 
-    $ python3 -m pip install -e .[dev]
+    $ python3 -m pip install .[dev]
 
 Pour le lancer localement :
 
