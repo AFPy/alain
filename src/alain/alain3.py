@@ -139,6 +139,7 @@ def feed_dispatcher(bot):
     call_later = bot.loop.call_later
 
     def dispatcher(messages):
+        bot.log.info("Dispatching %d feed items", len(messages))
         bot.call_many("privmsg", messages)
         for i, (_, message) in enumerate(messages):
             if "afpy" in message.lower():
