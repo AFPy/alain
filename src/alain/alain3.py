@@ -92,53 +92,6 @@ class Alain:
                 self.bot.config.channel, random.choice(THANKS_WORDS)  # nosec
             )
 
-    def incoming_afpyros(self):
-        feed = feedparser.parse(
-            self.session.get("http://afpyro.afpy.org/afpyro.rss").text
-        )
-        now = date.today()
-        for afpyro in feed.entries:
-            afpyro_date = afpyro.updated_parsed.date()
-            if afpyro_date >= now:
-                yield afpyro_date, afpyro.link
-
-    @cron("30 17 * * *")
-    def afpyro_cron(self, force=False):
-        messages = []
-        now = date.today()
-        for afpyro_date, link in self.incoming_afpyros():
-            delta = afpyro_date - now
-            message = ""
-            if delta.days == 0:
-                message = "Ca va commencer!!! %s" % link
-            elif delta.days == 1:
-                message = "C'est demain!!! %s" % link
-            elif delta.days > 10 and (delta.days % 5 == 0 or force):
-                message = "Prochain afpyro dans %s jours...... *loin* %s" % (
-                    delta.days,
-                    link,
-                )
-            elif delta.days > 5 and (delta.days % 3 == 0 or force):
-                message = f"Prochain afpyro dans {delta.days} jours... {link}"
-            elif delta.days > 0 and delta.days < 5:
-                message = f"Prochain afpyro dans {delta.days} jours! {link}"
-            if message:
-                messages.append(message)
-        if force:
-            return messages
-        for msg in messages:
-            self.bot.privmsg(self.bot.config.channel, msg)
-        return None
-
-    @command(permission="view")
-    def afpyro(self, *_args, **_kwargs):
-        """Show incoming afpyro
-
-        %%afpyro
-        """
-        for msg in self.afpyro_cron(force=True):
-            yield msg
-
 
 @irc3.plugin
 class AfpySocial(Social):
@@ -179,27 +132,6 @@ class AfpySocial(Social):
     def send_alain_tweet(self, message):
         for name, status in self.send_tweet(message, id="alain"):
             self.bot.log.info("[tweet] %s: %s", name, status)
-
-
-# feeds
-
-AFPY_DATES_PATTERNS = [
-    re.compile(r"(\d{4})/(\d{2})/(\d{2}) (\d{,2}):(\d{2}):(\d{2})"),
-    re.compile(r"(\d{4})-(\d{2})-(\d{2}) (\d{,2}):(\d{2}):(\d{2})"),
-]
-
-
-def parse_afpy_date(unparsed_date):
-    """parse a UTC date in MM/DD/YYYY HH:MM:SS format"""
-    for afpy_date_pattern in AFPY_DATES_PATTERNS:
-        try:
-            found = afpy_date_pattern.search(unparsed_date).groups()
-            return tuple([int(i) for i in found] + [0, 0, 0])
-        except AttributeError:
-            pass
-
-
-feedparser.registerDateHandler(parse_afpy_date)
 
 
 def feed_dispatcher(bot):
