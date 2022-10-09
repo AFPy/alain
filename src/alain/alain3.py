@@ -1,6 +1,6 @@
 """This is alain_afpy, our IRC bot on #afpy.
 
-You can run it using `irc3 alain.ini`.
+You can run it using `irc3 alain-dev.ini`.
 """
 import random
 import re
