@@ -143,9 +143,13 @@ def feed_dispatcher(bot):
         bot.log.info("Dispatching %d feed items", len(messages))
         bot.call_many("privmsg", messages)
         for i, (_, message) in enumerate(messages):
-            if "afpy" in message.lower():
-                bot.log.info("Sending %r", message)
-                # call_later(i + 1, bot.privmsg, c, m)
-                call_later(i + 1, send_tweet, message)
+            if "mamot" in message.lower():
+                bot.log.info("Skipping %r, it's a pouet", message)
+                continue
+            if "afpy" not in message.lower():
+                bot.log.info("Skipping %r, it's not AFPy related", message)
+                continue
+            bot.log.info("Sending %r", message)
+            call_later(i + 1, send_tweet, message)
 
     return dispatcher
