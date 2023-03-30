@@ -48,7 +48,7 @@ class Alain:
         message = "WARNING !!! YAKAFOKON DETECTED !!!!"
         self.bot.privmsg(self.bot.config.channel, message)
 
-    @irc3.event(r":(?i)(?P<mask>\S+) PRIVMSG {channel} " r":.*\sapprendre.*python.*")
+    @irc3.event(r"(?i):(?P<mask>\S+) PRIVMSG {channel} " r":.*\sapprendre.*python.*")
     def tutorial(self, mask=None, channel=None, data=None):
         message = (
             """Pour apprendre python vous pouvez commencer par ici: """
