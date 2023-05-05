@@ -42,7 +42,7 @@ class Alain:
 
     @irc3.event(
         r":(?P<mask>\S+) PRIVMSG {channel} :"
-        r".*\s(faudrai.|faut|ca serait bien que)\s+qu.*"
+        r".*(faudrai.|faut|[scç]a serai.? bien)\s+qu.*"
     )
     def yakafokon(self, mask=None, channel=None, data=None):
         message = "WARNING !!! YAKAFOKON DETECTED !!!!"
